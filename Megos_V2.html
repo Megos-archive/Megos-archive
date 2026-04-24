@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Megos Archive V 2.0</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Megos Archive">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Megos%20Archive%22%2C%22short_name%22%3A%22Megos%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b0e14%22%2C%22theme_color%22%3A%22%230b0e14%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%253Crect%20width%3D'100'%20height%3D'100'%20rx%3D'20'%20fill%3D'%230b0e14'%2F%3E%253Ctext%20x%3D'50'%20y%3D'65'%20text-anchor%3D'middle'%20font-size%3D'50'%3E%F0%9F%8F%8E%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+    <style>
+        /* (c) Megos, 2026. Все права защищены. */
+        :root {
+            --bg: #0b0e14; --surface: #1a1e29; --text: #eef5ff; --border: #2f3a4c;
+            --primary: #5c7cfa; --primary-glow: rgba(92,124,250,0.3); --secondary-bg: #252d3e;
+            --chat-ai-bg: #2a3446; --gradient-start: #a5b9ff; --gradient-end: #5c7cfa;
+        }
+        .theme-racing {
+            --bg: #0a0c10; --surface: #121620; --text: #f0f2f5; --border: #1e3a5f;
+            --primary: #e6002d; --primary-glow: rgba(230,0,45,0.4); --secondary-bg: #1a1f2e;
+            --chat-ai-bg: #1e2840; --gradient-start: #ffcd00; --gradient-end: #e6002d;
+        }
+        .theme-cyberpunk {
+            --bg: #0d0221; --surface: #1a0b2e; --text: #00ff9d; --border: #ff00ff;
+            --primary: #ff00ff; --primary-glow: rgba(255,0,255,0.3); --secondary-bg: #2d1146;
+            --chat-ai-bg: #3d1a5c; --gradient-start: #ff00ff; --gradient-end: #00ff9d;
+        }
+        .theme-light {
+            --bg: #e8ecf2; --surface: #ffffff; --text: #1a1a2e; --border: #c5d0de;
+            --primary: #4a6cf7; --primary-glow: rgba(74,108,247,0.15); --secondary-bg: #dce3ec;
+            --chat-ai-bg: #c5d0de; --gradient-start: #4a6cf7; --gradient-end: #7c9aff;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            background:var(--bg);display:flex;justify-content:center;align-items:center;
+            min-height:100vh;font-family:system-ui,-apple-system,sans-serif;padding:10px;
+            transition:background 0.5s,color 0.5s;color:var(--text);
+        }
+        .disclaimer-banner{
+            position:fixed;top:20px;left:50%;transform:translateX(-50%);
+            background:linear-gradient(135deg,#ff8c00,#1a1a1a);color:white;padding:12px 20px;
+            border-radius:50px;z-index:10001;display:flex;align-items:center;gap:15px;
+            box-shadow:0 5px 20px rgba(255,140,0,0.3);border:1px solid #ff8c00;
+            max-width:400px;font-size:13px;backdrop-filter:blur(5px);
+        }
+        .disclaimer-banner.hidden{display:none}
+        .disclaimer-close{
+            background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;
+            border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;
+        }
+        .pin-screen{
+            position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:9999;
+            display:flex;flex-direction:column;justify-content:center;align-items:center;gap:30px;
+        }
+        .pin-screen.hidden{display:none}
+        .pin-title{
+            font-size:28px;font-weight:bold;
+            background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+        }
+        .pin-input{
+            background:var(--secondary-bg);border:2px solid var(--border);color:var(--text);
+            font-size:32px;padding:15px 25px;border-radius:60px;width:250px;text-align:center;
+            letter-spacing:8px;outline:none;
+        }
+        .pin-error{color:#ff6b6b;font-size:14px;min-height:20px}
+        .pin-hint{opacity:0.7;font-size:14px}
+        .phone-frame{
+            max-width:450px;width:100%;background:var(--surface);border-radius:40px;
+            padding:20px 15px;box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 30px var(--primary-glow);
+            border:1px solid var(--border);transition:all 0.5s;position:relative;
+        }
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px}
+        h2{
+            font-size:18px;display:flex;align-items:center;gap:5px;
+            background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;
+        }
+        .version-badge{
+            background:var(--primary);color:white;font-size:10px;padding:2px 8px;
+            border-radius:30px;-webkit-text-fill-color:white;
+        }
+        .header-actions{display:flex;gap:8px;align-items:center}
+        .icon-btn{
+            background:var(--secondary-bg);border:1px solid var(--border);color:var(--text);
+            width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;
+            align-items:center;justify-content:center;font-size:18px;transition:0.1s;opacity:0.7;
+        }
+        .icon-btn:hover{opacity:1}
+        .theme-selector{display:flex;gap:5px}
+        .theme-dot{
+            width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid var(--border);
+            transition:transform 0.2s;
+        }
+        .theme-dot:hover{transform:scale(1.15)}
+        .theme-dot.racing{background:linear-gradient(135deg,#e6002d,#ffcd00,#1e3a5f)}
+        .theme-dot.cyberpunk{background:linear-gradient(135deg,#ff00ff,#00ff9d)}
+        .theme-dot.light{background:linear-gradient(135deg,#ffffff,#a0b4d0)}
+        .theme-dot.dark{background:linear-gradient(135deg,#1a1e29,#0b0e14)}
+        .mini-player{
+            background:var(--secondary-bg);border-radius:30px;padding:8px 15px;margin:10px 0;
+            display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);
+        }
+        .player-info{display:flex;align-items:center;gap:10px;flex:1}
+        .player-icon{font-size:20px}
+        .player-track{font-size:12px;font-weight:bold;color:var(--text)}
+        .visualizer{
+            display:flex;gap:3px;align-items:flex-end;height:25px;margin:0 10px;
+        }
+        .vis-bar{
+            width:4px;background:var(--primary);border-radius:2px;transition:height 0.15s;
+            animation:visDance 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes visDance{from{height:5px}to{height:25px}}
+        .vis-bar:nth-child(1){animation-delay:0s}
+        .vis-bar:nth-child(2){animation-delay:0.1s}
+        .vis-bar:nth-child(3){animation-delay:0.2s}
+        .vis-bar:nth-child(4){animation-delay:0.3s}
+        .vis-bar:nth-child(5){animation-delay:0.4s}
+        .vis-bar:nth-child(6){animation-delay:0.5s}
+        .vis-bar:nth-child(7){animation-delay:0.6s}
+        .vis-bar:nth-child(8){animation-delay:0.7s}
+        .player-controls{display:flex;gap:5px}
+        .player-btn{
+            background:transparent;border:none;color:var(--text);font-size:18px;cursor:pointer;
+            width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+            justify-content:center;transition:0.1s;
+        }
+        .player-btn:hover{background:var(--primary);color:white}
+        .folders-bar{display:flex;gap:8px;margin-bottom:15px;overflow-x:auto;padding:5px 0}
+        .folder-btn{
+            background:var(--secondary-bg);border:1px solid var(--border);color:var(--text);
+            padding:8px 16px;border-radius:40px;font-size:13px;cursor:pointer;
+            white-space:nowrap;transition:0.1s;
+        }
+        .folder-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+        .sort-bar{display:flex;gap:5px;margin-bottom:10px;font-size:11px;opacity:0.7}
+        .sort-bar span{cursor:pointer;padding:3px 8px;border-radius:20px;transition:0.1s}
+        .sort-bar span.active{background:var(--primary);color:white;opacity:1}
+        .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+        .btn{
+            background:var(--surface);border:1px solid var(--border);color:var(--text);
+            padding:12px 16px;border-radius:40px;font-size:13px;font-weight:bold;cursor:pointer;
+            flex:1;min-width:100px;border-bottom:3px solid #10141c;transition:0.1s;
+        }
+        .btn-primary{background:var(--primary);color:white;border-bottom-color:var(--primary);border:none}
+        .btn-small{padding:6px 12px;font-size:11px;min-width:auto}
+        .btn:active{transform:translateY(2px);border-bottom-width:1px}
+        #realFileInput,#musicFileInput{display:none}
+        .tags-input-area{margin-top:10px}
+        .tags-input{
+            width:100%;padding:10px 14px;border-radius:30px;border:1px solid var(--border);
+            background:var(--secondary-bg);color:var(--text);font-size:13px;outline:none;
+        }
+        .tags-input::placeholder{color:var(--text);opacity:0.5}
+        .db-viewer{
+            background:var(--secondary-bg);border-radius:20px;padding:12px;margin:15px 0;
+            font-size:13px;border:1px solid var(--border);max-height:120px;overflow-y:auto;
+        }
+        .file-item{
+            display:flex;align-items:center;justify-content:space-between;padding:5px 0;
+            border-bottom:1px solid var(--border);
+        }
+        .file-item:last-child{border-bottom:none}
+        .file-info{display:flex;align-items:center;gap:10px}
+        .file-info img{
+            width:30px;height:30px;border-radius:8px;object-fit:cover;cursor:pointer;
+        }
+        .file-actions{display:flex;gap:5px}
+        .favorite-star{cursor:pointer;font-size:16px;opacity:0.5;transition:0.1s}
+        .favorite-star.active{opacity:1;color:#ffcd00;text-shadow:0 0 5px #ffcd00}
+        .chat-window{
+            background:var(--secondary-bg);border-radius:24px;height:200px;overflow-y:auto;
+            padding:15px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--border);
+        }
+        .message{
+            max-width:85%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.4;
+            animation:slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .message.user{background:var(--primary);align-self:flex-end;border-bottom-right-radius:4px;color:white}
+        .message.ai{background:var(--chat-ai-bg);align-self:flex-start;border-bottom-left-radius:4px}
+        .image-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+        .grid-image{
+            width:60px;height:60px;object-fit:cover;border-radius:12px;cursor:pointer;
+            border:2px solid var(--border);
+        }
+        .modal{
+            display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);
+            z-index:10000;justify-content:center;align-items:center;padding:20px;
+        }
+        .modal.active{display:flex}
+        .modal-content{
+            background:var(--surface);padding:30px;border-radius:30px;max-width:500px;
+            width:90%;max-height:80vh;overflow-y:auto;border:2px solid var(--primary);
+        }
+        .modal img{max-width:100%;max-height:70vh;border-radius:20px}
+        .modal-close{
+            position:absolute;top:20px;right:30px;color:white;font-size:40px;cursor:pointer;
+            background:rgba(255,255,255,0.1);width:50px;height:50px;border-radius:30px;
+            display:flex;align-items:center;justify-content:center;
+        }
+        .modal-textarea{
+            width:100%;min-height:150px;background:var(--secondary-bg);border:1px solid var(--border);
+            color:var(--text);padding:15px;border-radius:20px;font-size:14px;resize:vertical;margin:15px 0;
+        }
+        .info-signature{
+            margin-top:20px;text-align:center;font-size:16px;font-weight:bold;
+            background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+            border-top:1px solid var(--border);padding-top:20px;
+        }
+        .changelog-block{
+            background:var(--secondary-bg);border-radius:20px;padding:15px;margin:15px 0;
+            border-left:4px solid var(--primary);
+        }
+        .changelog-title{font-weight:bold;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+        .changelog-list{list-style:none;padding:0}
+        .changelog-list li{padding:5px 0;display:flex;align-items:flex-start;gap:8px;font-size:13px}
+        .input-area{display:flex;margin-top:15px;gap:8px}
+        #queryInput{
+            flex:1;background:var(--secondary-bg);border:1px solid var(--border);
+            padding:14px 16px;border-radius:40px;color:var(--text);font-size:15px;outline:none;
+        }
+        #queryInput::placeholder{color:#8a99b4}
+        .voice-btn{
+            background:var(--primary);border:none;color:white;width:44px;height:44px;
+            border-radius:50%;cursor:pointer;font-size:20px;display:flex;align-items:center;
+            justify-content:center;transition:0.1s;flex-shrink:0;
+        }
+        .voice-btn:active{transform:scale(0.9)}
+        .voice-btn.listening{animation:pulse 1s infinite;background:#ff4444}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,0.4)}50%{box-shadow:0 0 0 15px rgba(255,68,68,0)}}
+    </style>
+</head>
+<!-- (c) Megos, 2026. Все права защищены. -->
+<body>
+<div class="disclaimer-banner" id="disclaimerBanner">
+    <span>⚠️ Возможна долгая загрузка. Пожалуйста, подождите.</span>
+    <button class="disclaimer-close" onclick="hideDisclaimer()">✕</button>
+</div>
+<div class="pin-screen" id="pinScreen">
+    <div class="pin-title" id="pinTitle">🔐 ВВЕДИТЕ ПИН-КОД</div>
+    <input type="password" id="pinInput" class="pin-input" maxlength="9" placeholder="••••" onkeypress="handlePinEnter(event)">
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-hint" id="pinHint"></div>
+</div>
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <img id="modalImage" src="" alt="Просмотр">
+</div>
+<div class="modal" id="textModal" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:var(--text);margin-bottom:15px">📄 Просмотр заметки</h3>
+        <div id="modalTextContent" style="color:var(--text);line-height:1.6;white-space:pre-wrap"></div>
+        <button class="btn btn-primary" onclick="closeTextModal()" style="margin-top:20px">Закрыть</button>
+    </div>
+    <div class="modal-close" onclick="closeTextModal()">✕</div>
+</div>
+<div class="modal" id="textInputModal" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:var(--text);margin-bottom:15px" id="textModalTitle">📝 Новая заметка</h3>
+        <input type="text" id="noteTitleInput" placeholder="Название заметки" style="width:100%;padding:12px;border-radius:20px;border:1px solid var(--border);background:var(--secondary-bg);color:var(--text);margin-bottom:10px">
+        <textarea id="noteContentInput" class="modal-textarea" placeholder="Введите ваш текст здесь..."></textarea>
+        <div class="tags-input-area">
+            <input type="text" id="noteTagsInput" class="tags-input" placeholder="Теги (через запятую): важное, идея, проект">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:15px">
+            <button class="btn btn-primary" id="saveNoteBtn" onclick="saveNewNote()">💾 Сохранить</button>
+            <button class="btn" onclick="closeTextInputModal()">Отмена</button>
+        </div>
+    </div>
+    <div class="modal-close" onclick="closeTextInputModal()">✕</div>
+</div>
+<div class="modal" id="folderModal" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:var(--text);margin-bottom:15px">📁 Новая папка</h3>
+        <input type="text" id="folderNameInput" placeholder="Название папки" style="width:100%;padding:12px;border-radius:20px;border:1px solid var(--border);background:var(--secondary-bg);color:var(--text)">
+        <div style="display:flex;gap:10px;margin-top:20px">
+            <button class="btn btn-primary" onclick="createFolder()">Создать</button>
+            <button class="btn" onclick="closeFolderModal()">Отмена</button>
+        </div>
+    </div>
+    <div class="modal-close" onclick="closeFolderModal()">✕</div>
+</div>
+<div class="modal" id="infoModal" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:var(--text);margin-bottom:15px">ℹ️ О приложении</h3>
+        <div style="color:var(--text);line-height:1.8">
+            <p><strong>🏎️ Megos Archive V 2.0</strong> — Гоночная серия</p>
+            
+
+            <div class="changelog-block">
+                <div class="changelog-title"><span>🔄</span> Последние изменения (V 2.0)</div>
+                <ul class="changelog-list">
+                    <li><span>🆕</span> PWA — установка на телефон как приложение</li>
+                    <li><span>🆕</span> Сортировка файлов по дате / названию</li>
+                    <li><span>🆕</span> Шеринг — поделиться файлом</li>
+                    <li><span>🆕</span> Загрузка своей музыки (MP3)</li>
+                    <li><span>🆕</span> Визуализатор (танцующие полоски)</li>
+                    <li><span>🆕</span> Голосовой поиск (экспериментально)</li>
+                    <li><span>🆕</span> Анимированные переходы тем</li>
+                </ul>
+            </div>
+            <p><strong>📋 Возможности:</strong></p>
+            <ul style="margin-left:20px">
+                <li>📸 Загрузка фото с поиском по названию и тегам</li>
+                <li>📝 Текстовые заметки с поиском по содержимому</li>
+                <li>✏️ Редактирование текстовых заметок</li>
+                <li>🏷️ Ручные теги для фото и текста</li>
+                <li>⭐ Избранное — закрепляйте важные файлы</li>
+                <li>📁 Папки для организации</li>
+                <li>🎨 4 темы оформления</li>
+                <li>🔐 Личный ПИН-код</li>
+                <li>🎵 Загрузка своей музыки + визуализатор</li>
+            </ul>
+        </div>
+        <div class="info-signature">🏆 © Megos, 2026. Все права защищены. 🏆</div>
+        <button class="btn btn-primary" onclick="closeInfoModal()" style="margin-top:20px;width:100%">Понятно</button>
+    </div>
+    <div class="modal-close" onclick="closeInfoModal()">✕</div>
+</div>
+<div class="modal" id="changelogModal" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:var(--text);margin-bottom:15px">📋 История версий</h3>
+        <div style="color:var(--text)">
+            <div class="changelog-block">
+                <div class="changelog-title">V 2.0 (Текущая) — Масштабное обновление</div>
+                <ul class="changelog-list">
+                    <li><span>🆕</span> PWA, сортировка, шеринг, своя музыка</li>
+                </ul>
+            </div>
+            <div class="changelog-block">
+                <div class="changelog-title">V 1.6.1</div>
+                <ul class="changelog-list"><li><span>✅</span> Исправление багов, новая музыка</li></ul>
+            </div>
+            <div class="changelog-block">
+                <div class="changelog-title">V 1.6.0</div>
+                <ul class="changelog-list"><li><span>🆕</span> Редактирование, теги, избранное</li></ul>
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="closeChangelogModal()" style="margin-top:20px;width:100%">Закрыть</button>
+    </div>
+    <div class="modal-close" onclick="closeChangelogModal()">✕</div>
+</div>
+<div class="phone-frame" id="appContainer">
+    <div class="header">
+        <h2>🏎️ Megos Archive <span class="version-badge">V 2.0</span></h2>
+        <div class="header-actions">
+            <button class="icon-btn" onclick="openChangelogModal()" title="История версий">📋</button>
+            <button class="icon-btn" onclick="openInfoModal()" title="О приложении">❓</button>
+        </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+        <div class="theme-selector">
+            <div class="theme-dot dark" onclick="setTheme('')" title="Тёмная"></div>
+            <div class="theme-dot racing" onclick="setTheme('theme-racing')" title="Гоночная"></div>
+            <div class="theme-dot cyberpunk" onclick="setTheme('theme-cyberpunk')" title="Киберпанк"></div>
+            <div class="theme-dot light" onclick="setTheme('theme-light')" title="Светлая"></div>
+        </div>
+    </div>
+    <div class="mini-player">
+        <div class="player-info">
+            <span class="player-icon">🎵</span>
+            <div>
+                <div class="player-track" id="currentTrackName">Нет трека</div>
+            </div>
+        </div>
+        <div class="visualizer" id="visualizer">
+            <div class="vis-bar"></div><div class="vis-bar"></div><div class="vis-bar"></div><div class="vis-bar"></div>
+            <div class="vis-bar"></div><div class="vis-bar"></div><div class="vis-bar"></div><div class="vis-bar"></div>
+        </div>
+        <div class="player-controls">
+            <button class="player-btn" onclick="document.getElementById('musicFileInput').click()" title="Загрузить MP3">📁</button>
+            <button class="player-btn" id="musicToggleBtn" onclick="toggleMusic()" title="Вкл/Выкл">🎵</button>
+            <button class="player-btn" onclick="nextTrack()" title="Следующий трек">⏭</button>
+        </div>
+        <input type="file" id="musicFileInput" accept="audio/*" onchange="handleMusicUpload(event)" multiple>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;opacity:0.7">📂 Папки:</span>
+        <button class="btn btn-small" onclick="openFolderModal()">+ Новая</button>
+    </div>
+    <div class="folders-bar" id="foldersBar"></div>
+    <div class="sort-bar" id="sortBar">
+        <span>🔽 Сортировка:</span>
+        <span class="active" onclick="setSort('date-desc')">Новые</span>
+        <span onclick="setSort('date-asc')">Старые</span>
+        <span onclick="setSort('name-asc')">А-Я</span>
+        <span onclick="setSort('name-desc')">Я-А</span>
+    </div>
+    <div style="background:var(--secondary-bg);border-radius:24px;padding:15px;margin:15px 0;border:1px solid var(--border)">
+        <div style="margin-bottom:10px;opacity:0.8">📎 Добавить в базу:</div>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="triggerFileUpload()">🖼️ Фото</button>
+            <button class="btn btn-primary" onclick="openTextInputModal()">📝 Ввести текст</button>
+        </div>
+        <div class="tags-input-area">
+            <input type="text" id="globalTagsInput" class="tags-input" placeholder="Теги для следующего файла (через запятую)">
+        </div>
+        <input type="file" id="realFileInput" accept="image/*" onchange="handleRealFileUpload(event)" multiple>
+    </div>
+    <div style="font-weight:bold;margin-bottom:5px;display:flex;justify-content:space-between">
+        <span>📦 Архив (<span id="fileCount">0</span>)</span>
+        <button class="btn btn-small" onclick="clearAllData()" style="background:#ff6b6b20;color:#ff6b6b">🗑️ Сброс</button>
+    </div>
+    <div class="db-viewer" id="databaseView">
+        <span style="opacity:0.6">Пока пусто. Добавь файлы 👆</span>
+    </div>
+    <div style="font-weight:bold;margin:15px 0 5px">💬 Чат с поиском</div>
+    <div class="chat-window" id="chatWindow">
+        <div class="message ai">🏎️ Megos Archive V 2.0! PWA, своя музыка, визуализатор, шеринг. Поехали!</div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="queryInput" placeholder="Найди фото или текст..." onkeypress="handleKeyPress(event)">
+        <button class="voice-btn" id="voiceBtn" onclick="startVoiceSearch()" title="Голосовой поиск">🎤</button>
+        <button class="btn btn-primary" style="flex:0" onclick="askAI()">➡️</button>
+    </div>
+</div>
+<script>
+/*
+ * Megos Archive V 2.0
+ * © Megos, 2026. Все права защищены.
+ */
+// ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+let myDatabase=[];
+let folders=[{id:'all',name:'Все файлы'},{id:'favorites',name:'⭐ Избранное'}];
+let activeFolder='all';
+let userPIN=null;
+let isFirstRun=false;
+let musicEnabled=true;
+let audioContext=null;
+let musicGain=null;
+let activeAudioElement=null;
+let editingNoteId=null;
+let currentSort='date-desc';
+let uploadedTracks=[];
+let currentTrackIdx=0;
+
+// ==================== ИНИЦИАЛИЗАЦИЯ ====================
+(async function init(){
+    const savedPIN=localStorage.getItem('userPIN');
+    if(!savedPIN){
+        isFirstRun=true;
+        document.getElementById('pinTitle').textContent='🔐 ПРИДУМАЙТЕ ПИН-КОД';
+        document.getElementById('pinHint').textContent='От 4 до 9 цифр. Запомните его!';
+    }else{
+        userPIN=savedPIN;
+        document.getElementById('pinHint').textContent='Введите ваш ПИН-код';
+    }
+    loadFromStorage();
+    renderFolders();
+    renderDatabaseView();
+    initAudio();
+    const theme=localStorage.getItem('appTheme');
+    if(theme)setTheme(theme);
+    const savedMusic=localStorage.getItem('musicEnabled');
+    if(savedMusic!==null){
+        musicEnabled=savedMusic==='true';
+        updateMusicButton();
+    }
+    if(localStorage.getItem('disclaimerHidden')==='true'){
+        document.getElementById('disclaimerBanner').classList.add('hidden');
+    }
+    if(!folders.find(f=>f.id==='favorites')){
+        folders.push({id:'favorites',name:'⭐ Избранное'});
+    }
+})();
+
+// ==================== ДИСКЛЕЙМЕР ====================
+window.hideDisclaimer=function(){
+    document.getElementById('disclaimerBanner').classList.add('hidden');
+    localStorage.setItem('disclaimerHidden','true');
+}
+
+// ==================== ПИН-КОД ====================
+window.handlePinEnter=function(e){
+    if(e.key==='Enter'){
+        const input=document.getElementById('pinInput');
+        const value=input.value;
+        const error=document.getElementById('pinError');
+        if(isFirstRun){
+            if(value.length<4||value.length>9){error.textContent='❌ ПИН должен быть от 4 до 9 цифр';return;}
+            if(!/^\d+$/.test(value)){error.textContent='❌ Только цифры';return;}
+            userPIN=value;
+            localStorage.setItem('userPIN',userPIN);
+            isFirstRun=false;
+            document.getElementById('pinScreen').classList.add('hidden');
+            playSound('unlock');
+            addMessageToChat('ai','✅ ПИН-код установлен! Добро пожаловать в Megos Archive V 2.0!');
+        }else{
+            if(value===userPIN){
+                document.getElementById('pinScreen').classList.add('hidden');
+                playSound('unlock');
+            }else{
+                error.textContent='❌ Неверный ПИН-код';
+                input.value='';
+                playSound('error');
+            }
+        }
+    }
+}// ==================== АУДИО ====================
+function initAudio(){
+    try{
+        audioContext=new(window.AudioContext||window.webkitAudioContext)();
+    }catch(e){console.log('Аудио не поддерживается');}
+}
+window.handleMusicUpload=function(event){
+    const files=event.target.files;
+    for(let file of files){
+        const url=URL.createObjectURL(file);
+        uploadedTracks.push({name:file.name.replace(/\.[^/.]+$/,''),url:url,file:file});
+    }
+    if(uploadedTracks.length>0){
+        currentTrackIdx=uploadedTracks.length-1;
+        document.getElementById('currentTrackName').textContent=uploadedTracks[currentTrackIdx].name;
+        if(musicEnabled)playUploadedTrack();
+        addMessageToChat('ai','🎵 Загружено треков: '+uploadedTracks.length);
+    }
+    event.target.value='';
+}
+function playUploadedTrack(){
+    if(uploadedTracks.length===0){document.getElementById('currentTrackName').textContent='Нет трека';return;}
+    if(activeAudioElement){activeAudioElement.pause();activeAudioElement=null;}
+    const track=uploadedTracks[currentTrackIdx];
+    const audio=new Audio(track.url);
+    audio.volume=0.25;
+    audio.loop=true;
+    audio.play().catch(e=>console.log('Автовоспроизведение заблокировано'));
+    activeAudioElement=audio;
+    document.getElementById('currentTrackName').textContent=track.name;
+    document.getElementById('visualizer').style.display='flex';
+}
+function stopAllAudio(){
+    if(activeAudioElement){activeAudioElement.pause();activeAudioElement=null;}
+    document.getElementById('visualizer').style.display='none';
+}
+window.toggleMusic=function(){
+    musicEnabled=!musicEnabled;
+    localStorage.setItem('musicEnabled',musicEnabled);
+    updateMusicButton();
+    if(musicEnabled){if(uploadedTracks.length>0)playUploadedTrack();}
+    else{stopAllAudio();addMessageToChat('ai','🔇 Музыка выключена');}
+}
+window.nextTrack=function(){
+    if(uploadedTracks.length===0){addMessageToChat('ai','📁 Загрузите MP3 файлы через кнопку 📁');return;}
+    currentTrackIdx=(currentTrackIdx+1)%uploadedTracks.length;
+    if(musicEnabled){playUploadedTrack();addMessageToChat('ai','⏭ '+uploadedTracks[currentTrackIdx].name);}
+    else{document.getElementById('currentTrackName').textContent=uploadedTracks[currentTrackIdx].name;}
+}
+function updateMusicButton(){
+    const btn=document.getElementById('musicToggleBtn');
+    btn.textContent=musicEnabled?'🎵':'🔇';
+    btn.style.opacity=musicEnabled?'1':'0.5';
+}
+
+// ==================== ТЕМЫ ====================
+window.setTheme=function(themeClass){
+    const container=document.getElementById('appContainer');
+    container.style.transition='all 0.5s ease';
+    container.className='phone-frame';
+    if(themeClass)container.classList.add(themeClass);
+    localStorage.setItem('appTheme',themeClass);
+}
+
+// ==================== ПАПКИ ====================
+function renderFolders(){
+    const bar=document.getElementById('foldersBar');
+    bar.innerHTML='';
+    bar.innerHTML=`<button class="folder-btn ${activeFolder==='all'?'active':''}" onclick="setActiveFolder('all')">📋 Все файлы</button>`;
+    const favBtn=document.createElement('button');
+    favBtn.className=`folder-btn ${activeFolder==='favorites'?'active':''}`;
+    favBtn.innerHTML='⭐ Избранное';
+    favBtn.onclick=()=>setActiveFolder('favorites');
+    bar.appendChild(favBtn);
+    folders.filter(f=>f.id!=='all'&&f.id!=='favorites').forEach(f=>{
+        const btn=document.createElement('button');
+        btn.className=`folder-btn ${activeFolder===f.id?'active':''}`;
+        btn.innerHTML=`📁 ${f.name}`;
+        btn.onclick=()=>setActiveFolder(f.id);
+        bar.appendChild(btn);
+    });
+}
+window.setActiveFolder=function(folderId){activeFolder=folderId;renderFolders();renderDatabaseView();}
+window.openFolderModal=()=>document.getElementById('folderModal').classList.add('active');
+window.closeFolderModal=()=>{document.getElementById('folderModal').classList.remove('active');document.getElementById('folderNameInput').value='';}
+window.createFolder=function(){
+    const name=document.getElementById('folderNameInput').value.trim();
+    if(name){folders.push({id:Date.now().toString(),name:name});closeFolderModal();renderFolders();saveToStorage();}
+}
+
+// ==================== СОРТИРОВКА ====================
+window.setSort=function(sortType){
+    currentSort=sortType;
+    document.querySelectorAll('#sortBar span').forEach(s=>s.classList.remove('active'));
+    event.target.classList.add('active');
+    renderDatabaseView();
+}
+function getSortedItems(items){
+    let sorted=[...items];
+    switch(currentSort){
+        case 'date-desc':sorted.sort((a,b)=>b.id-a.id);break;
+        case 'date-asc':sorted.sort((a,b)=>a.id-b.id);break;
+        case 'name-asc':sorted.sort((a,b)=>a.name.localeCompare(b.name));break;
+        case 'name-desc':sorted.sort((a,b)=>b.name.localeCompare(a.name));break;
+    }
+    return sorted;
+}
+
+// ==================== МОДАЛЬНЫЕ ОКНА ====================
+window.openModal=(src)=>{document.getElementById('modalImage').src=src;document.getElementById('imageModal').classList.add('active');}
+window.closeModal=()=>document.getElementById('imageModal').classList.remove('active');
+window.openTextModal=(content)=>{document.getElementById('modalTextContent').textContent=content;document.getElementById('textModal').classList.add('active');}
+window.closeTextModal=()=>document.getElementById('textModal').classList.remove('active');
+window.openTextInputModal=(noteId=null)=>{
+    editingNoteId=noteId;
+    const title=document.getElementById('textModalTitle');
+    const titleInput=document.getElementById('noteTitleInput');
+    const contentInput=document.getElementById('noteContentInput');
+    const tagsInput=document.getElementById('noteTagsInput');
+    const saveBtn=document.getElementById('saveNoteBtn');
+    if(noteId){
+        const note=myDatabase.find(f=>f.id===noteId);
+        if(note){
+            title.textContent='✏️ Редактировать заметку';
+            titleInput.value=note.name||'';
+            contentInput.value=note.content||'';
+            tagsInput.value=note.customTags||'';
+            saveBtn.textContent='💾 Обновить';
+        }
+    }else{
+        title.textContent='📝 Новая заметка';
+        titleInput.value='';
+        contentInput.value='';
+        tagsInput.value=document.getElementById('globalTagsInput').value;
+        saveBtn.textContent='💾 Сохранить';
+    }
+    document.getElementById('textInputModal').classList.add('active');
+}
+window.closeTextInputModal=()=>{document.getElementById('textInputModal').classList.remove('active');editingNoteId=null;}
+window.openInfoModal=()=>document.getElementById('infoModal').classList.add('active');
+window.closeInfoModal=()=>document.getElementById('infoModal').classList.remove('active');
+window.openChangelogModal=()=>document.getElementById('changelogModal').classList.add('active');
+window.closeChangelogModal=()=>document.getElementById('changelogModal').classList.remove('active');
+
+// ==================== ЗАГРУЗКА ФАЙЛОВ ====================
+window.triggerFileUpload=()=>document.getElementById('realFileInput').click();
+window.handleRealFileUpload=function(event){
+    const files=event.target.files;
+    const globalTags=document.getElementById('globalTagsInput').value;
+    for(let file of files){
+        if(!file.type.startsWith('image/'))continue;
+        const reader=new FileReader();
+        reader.onload=function(e){
+            const fileId=Date.now()+Math.random();
+            myDatabase.push({
+                id:fileId,type:'image',name:file.name,content:e.target.result,
+                folder:activeFolder==='all'?null:activeFolder,
+                tags:(file.name+' '+globalTags).toLowerCase(),
+                customTags:globalTags,favorite:false
+            });
+            renderDatabaseView();saveToStorage();
+            playSound('add');addMessageToChat('ai',`✅ Фото "${file.name}" загружено.`);
+        };
+        reader.readAsDataURL(file);
+    }
+    event.target.value='';
+}
+
+// ==================== СОХРАНЕНИЕ ЗАМЕТКИ ====================
+window.saveNewNote=function(){
+    const title=document.getElementById('noteTitleInput').value.trim()||'Без названия';
+    const content=document.getElementById('noteContentInput').value.trim();
+    const customTags=document.getElementById('noteTagsInput').value.trim();
+    if(!content){alert('Введите текст заметки');return;}
+    if(editingNoteId){
+        const note=myDatabase.find(f=>f.id===editingNoteId);
+        if(note){
+            note.name=title;note.content=content;note.customTags=customTags;
+            note.tags=(title+' '+content+' '+customTags).toLowerCase();
+            addMessageToChat('ai',`✏️ Заметка "${title}" обновлена.`);
+        }
+    }else{
+        myDatabase.push({
+            id:Date.now()+Math.random(),type:'text',name:title,content:content,
+            folder:activeFolder==='all'?null:activeFolder,
+            tags:(title+' '+content+' '+customTags).toLowerCase(),
+            customTags:customTags,favorite:false
+        });
+        addMessageToChat('ai',`✅ Заметка "${title}" сохранена.`);
+    }
+    closeTextInputModal();renderDatabaseView();saveToStorage();playSound('add');
+}
+
+// ==================== ШЕРИНГ ====================
+window.shareFile=async function(id){
+    const file=myDatabase.find(f=>f.id==id);
+    if(!file)return;
+    if(navigator.share){
+        try{
+            if(file.type==='image'){
+                const blob=await(await fetch(file.content)).blob();
+                const shareFile=new File([blob],file.name,{type:'image/png'});
+                await navigator.share({title:file.name,files:[shareFile]});
+            }else{
+                await navigator.share({title:file.name,text:file.content});
+            }
+        }catch(e){console.log('Шеринг отменён');}
+    }else{
+        if(file.type==='text'){openTextModal(file.content);addMessageToChat('ai','📤 Скопируйте текст из открывшегося окна.');}
+        else{addMessageToChat('ai','📤 Функция "Поделиться" доступна на мобильных устройствах.');}
+    }
+}
+
+// ==================== ИЗБРАННОЕ ====================
+window.toggleFavorite=function(id){
+    const file=myDatabase.find(f=>f.id==id);
+    if(file){
+        file.favorite=!file.favorite;
+        renderDatabaseView();saveToStorage();
+        const status=file.favorite?'добавлен в':'удалён из';
+        addMessageToChat('ai',`⭐ Файл "${file.name}" ${status} избранного.`);
+    }
+}
+
+// ==================== ОТРИСОВКА ====================
+function renderDatabaseView(){
+    const viewDiv=document.getElementById('databaseView');
+    const countSpan=document.getElementById('fileCount');
+    let filtered=[];
+    if(activeFolder==='favorites'){filtered=myDatabase.filter(f=>f.favorite===true);}
+    else if(activeFolder==='all'){filtered=myDatabase;}
+    else{filtered=myDatabase.filter(f=>f.folder===activeFolder);}
+    filtered=getSortedItems(filtered);
+    if(filtered.length===0){
+        viewDiv.innerHTML='<span style="opacity:0.6">Пусто. Добавь файлы 👆</span>';
+        countSpan.innerText='0';return;
+    }
+    countSpan.innerText=filtered.length;
+    let html='';
+    filtered.forEach(item=>{
+        const icon=item.type==='image'?'🖼️':'📄';
+        const preview=item.type==='image'?`<img src="${item.content}" onclick="openModal('${item.content}')">`:'';
+        const starClass=item.favorite?'active':'';
+        html+=`<div class="file-item">
+            <div class="file-info">${preview}<div><div>${icon} ${item.name}</div><div style="font-size:10px;opacity:0.6">${item.customTags||''}</div></div></div>
+            <div class="file-actions">
+                <span class="favorite-star ${starClass}" onclick="toggleFavorite('${item.id}')">⭐</span>
+                <button class="btn btn-small" onclick="shareFile('${item.id}')" title="Поделиться">📤</button>
+                ${item.type==='text'?`<button class="btn btn-small" onclick="openTextInputModal('${item.id}')">✏️</button>`:''}
+                <button class="btn btn-small" onclick="deleteFile('${item.id}')">🗑️</button>
+            </div></div>`;
+    });
+    viewDiv.innerHTML=html;
+}
+window.deleteFile=function(id){
+    myDatabase=myDatabase.filter(f=>f.id!=id);
+    renderDatabaseView();saveToStorage();
+    addMessageToChat('ai','🗑️ Файл удалён.');
+}
+
+// ==================== ПОИСК ====================
+function searchInDatabase(query){
+    const lowerQuery=query.toLowerCase();
+    let filtered=[];
+    if(activeFolder==='favorites'){filtered=myDatabase.filter(f=>f.favorite===true);}
+    else if(activeFolder==='all'){filtered=myDatabase;}
+    else{filtered=myDatabase.filter(f=>f.folder===activeFolder);}
+    if(lowerQuery.includes('сколько')){
+        let count=0;
+        const keyword=extractKeyword(lowerQuery,['фото','текст','картин','замет']);
+        filtered.forEach(f=>{
+            if(keyword==='фото'||keyword==='картин'){if(f.type==='image')count++;}
+            else if(keyword==='текст'||keyword==='замет'){if(f.type==='text')count++;}
+            else count++;
+        });
+        return{text:`📊 Найдено: ${count}`,images:[],texts:[]};
+    }
+    if(lowerQuery.includes('найди')||lowerQuery.includes('покажи')||lowerQuery.includes('где')){
+        const words=lowerQuery.replace(/найди|покажи|где/g,'').trim().split(' ');
+        let results=[];
+        filtered.forEach(f=>{
+            let match=false;
+            for(let w of words){
+                if(w.length<2)continue;
+                if(f.name.toLowerCase().includes(w))match=true;
+                if(f.tags&&f.tags.includes(w))match=true;
+                if(f.type==='text'&&f.content&&f.content.toLowerCase().includes(w))match=true;
+            }
+            if(match)results.push(f);
+        });
+        if(results.length===0){return{text:'😕 Ничего не найдено.',images:[],texts:[]};}
+        const images=results.filter(r=>r.type==='image');
+        const texts=results.filter(r=>r.type==='text');
+        let answer=`🔍 Нашёл ${results.length}:\n`;
+        results.forEach((r,i)=>{answer+=`${i+1}. ${r.type==='image'?'🖼️':'📄'} ${r.name}\n`;});
+        return{text:answer,images,texts};
+    }
+    return{text:'🤖 Спроси "найди [слово]" или "покажи [слово]".',images:[],texts:[]};
+}
+function extractKeyword(text,words){for(let w of words)if(text.includes(w))return w;return null;}
+
+// ==================== ОТПРАВКА В ЧАТ ====================
+function addMessageWithResults(sender,text,images,texts){
+    const chatDiv=document.getElementById('chatWindow');
+    const msgDiv=document.createElement('div');
+    msgDiv.classList.add('message',sender);
+    msgDiv.innerText=text;
+    if(images.length>0){
+        const grid=document.createElement('div');
+        grid.classList.add('image-grid');
+        images.forEach(img=>{
+            const imgEl=document.createElement('img');
+            imgEl.src=img.content;
+            imgEl.classList.add('grid-image');
+            imgEl.onclick=()=>openModal(img.content);
+            grid.appendChild(imgEl);
+        });
+        msgDiv.appendChild(grid);
+    }
+    if(texts.length>0){
+        texts.forEach(txt=>{
+            const txtBtn=document.createElement('button');
+            txtBtn.className='btn btn-small';
+            txtBtn.style.marginTop='5px';txtBtn.style.marginRight='5px';
+            txtBtn.textContent=`📄 ${txt.name}`;
+            txtBtn.onclick=()=>openTextModal(txt.content);
+            msgDiv.appendChild(txtBtn);
+        });
+    }
+    chatDiv.appendChild(msgDiv);
+    chatDiv.scrollTop=chatDiv.scrollHeight;
+}
+function addMessageToChat(sender,text){
+    const chatDiv=document.getElementById('chatWindow');
+    const msgDiv=document.createElement('div');
+    msgDiv.classList.add('message',sender);
+    msgDiv.innerText=text;
+    chatDiv.appendChild(msgDiv);
+    chatDiv.scrollTop=chatDiv.scrollHeight;
+}
+window.askAI=function(){
+    const input=document.getElementById('queryInput');
+    const query=input.value.trim();
+    if(!query)return;
+    addMessageToChat('user',query);
+    playSound('send');
+    let filtered=[];
+    if(activeFolder==='favorites'){filtered=myDatabase.filter(f=>f.favorite===true);}
+    else if(activeFolder==='all'){filtered=myDatabase;}
+    else{filtered=myDatabase.filter(f=>f.folder===activeFolder);}
+    const response=filtered.length===0?{text:'🗄️ Архив пуст.',images:[],texts:[]}:searchInDatabase(query);
+    setTimeout(()=>{
+        if(response.images?.length||response.texts?.length){
+            addMessageWithResults('ai',response.text,response.images||[],response.texts||[]);
+        }else{addMessageToChat('ai',response.text);}
+    },300);
+    input.value='';
+}
+window.handleKeyPress=(e)=>{if(e.key==='Enter')askAI();}
+
+// ==================== ГОЛОСОВОЙ ПОИСК ====================
+window.startVoiceSearch=function(){
+    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SpeechRecognition){
+        addMessageToChat('ai','🎤 Голосовой поиск не поддерживается этим браузером. Попробуйте Chrome на телефоне.');
+        return;
+    }
+    const recognition=new SpeechRecognition();
+    recognition.lang='ru-RU';
+    recognition.interimResults=false;
+    recognition.maxAlternatives=1;
+    const voiceBtn=document.getElementById('voiceBtn');
+    voiceBtn.classList.add('listening');
+    recognition.start();
+    recognition.onresult=function(event){
+        const query=event.results[0][0].transcript;
+        document.getElementById('queryInput').value=query;
+        voiceBtn.classList.remove('listening');
+        addMessageToChat('ai','🎤 Распознано: "'+query+'"');
+        askAI();
+    };
+    recognition.onerror=function(){
+        voiceBtn.classList.remove('listening');
+        addMessageToChat('ai','🎤 Не удалось распознать речь. Попробуйте ещё раз.');
+    };
+    recognition.onend=function(){voiceBtn.classList.remove('listening');};
+}
+
+// ==================== ЗВУКИ ====================
+function playSound(type){
+    try{
+        const ctx=new(window.AudioContext||window.webkitAudioContext)();
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.connect(gain);gain.connect(ctx.destination);
+        if(type==='add'){osc.frequency.value=800;gain.gain.value=0.1;osc.start();osc.stop(ctx.currentTime+0.05);}
+        else if(type==='send'){osc.frequency.value=600;gain.gain.value=0.05;osc.start();osc.stop(ctx.currentTime+0.08);}
+        else if(type==='unlock'){osc.frequency.value=1000;gain.gain.value=0.1;osc.start();osc.stop(ctx.currentTime+0.1);}
+        else if(type==='error'){osc.frequency.value=300;gain.gain.value=0.1;osc.start();osc.stop(ctx.currentTime+0.2);}
+    }catch(e){}
+}
+
+// ==================== СОХРАНЕНИЕ / ЗАГРУЗКА / СБРОС ====================
+function saveToStorage(){
+    localStorage.setItem('myDatabase',JSON.stringify(myDatabase));
+    localStorage.setItem('folders',JSON.stringify(folders));
+}
+function loadFromStorage(){
+    const db=localStorage.getItem('myDatabase');
+    const fld=localStorage.getItem('folders');
+    if(db)myDatabase=JSON.parse(db);
+    if(fld){
+        folders=JSON.parse(fld);
+        if(!folders.find(f=>f.id==='favorites')){folders.push({id:'favorites',name:'⭐ Избранное'});}
+    }
+}
+window.clearAllData=function(){
+    if(confirm('Удалить ВСЁ? ПИН-код сохранится.')){
+        myDatabase=[];
+        folders=[{id:'all',name:'Все файлы'},{id:'favorites',name:'⭐ Избранное'}];
+        activeFolder='all';
+        saveToStorage();renderDatabaseView();renderFolders();
+        addMessageToChat('ai','🗑️ Все данные удалены.');
+    }
+}
+
+// ==================== PWA УСТАНОВКА ====================
+window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    window.deferredPrompt=e;
+    setTimeout(()=>{
+        addMessageToChat('ai','📱 Нажмите кнопку "Установить" в меню браузера, чтобы добавить Megos Archive на рабочий стол!');
+    },1500);
+});
+</script>
+</body>
+</html>
